@@ -3,6 +3,6 @@ CESAR School
 
 
 Particpantes:
-Marcelo Bresani - mbvo@cesar.school
+Marcelo Bresani - mbvo@cesar.school;
 Thiago Nadler - 
 Rodrigo Torres -
