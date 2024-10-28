@@ -4,5 +4,5 @@ CESAR School
 
 Particpantes:
 Marcelo Bresani - mbvo@cesar.school;
-Thiago Nadler - 
-Rodrigo Torres -
+Thiago Nadler - tlns@cesar.school
+Rodrigo Torres - rtgf@cesar.school
