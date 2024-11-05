@@ -6,3 +6,6 @@ Particpantes:
 Marcelo Bresani - mbvo@cesar.school;
 Thiago Nadler - tlns@cesar.school;
 Rodrigo Torres - rtgf@cesar.school;
+
+## Descrição
+O conceito do jogo se trata de um homem que percorre um corredor, tendo que passar entre paredes.
