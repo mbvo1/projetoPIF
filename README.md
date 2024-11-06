@@ -8,6 +8,5 @@ Thiago Nadler - tlns@cesar.school;
 Rodrigo Torres - rtgf@cesar.school;
 
 ## Mecânica do Jogo
-- Controles: O jogador utiliza a tecla "w" para fazer o personagem "pular" e evitar obstáculos.
-- Objetivo: O objetivo é percorrer o maior número de paredes possível sem colidir. Cada parede ultrapassada representa um aumento na pontuação.
-- Personagem: O personagem no jogo é representado por um número.
+Se movimente para esquerda ou direita usando a tecla A para esquerda e a D para direita
+Atire na barra de espaço:Administre os tiros! apenas 3 balas são permitidas até tocar o teto ou algum invasor.
