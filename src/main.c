@@ -1,88 +1,232 @@
-/**
- * main.h
- * Created on Aug, 23th 2023
- * Author: Tiago Barros
- * Based on "From C to C++ course - 2002"
-*/
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <string.h>
-
 #include "screen.h"
-#include "keyboard.h"
 #include "timer.h"
+#include "keyboard.h"
 
-int x = 34, y = 12;
-int incX = 1, incY = 1;
+#define PLAYER_SYMBOL 'H'
+#define INVADER_SYMBOL 'Z'
+#define BULLET_SYMBOL '|'
+#define MAX_INVADERS 20
+#define MAX_BULLETS 3
 
-void printHello(int nextX, int nextY)
-{
-    screenSetColor(CYAN, DARKGRAY);
-    screenGotoxy(x, y);
-    printf("           ");
-    x = nextX;
-    y = nextY;
-    screenGotoxy(x, y);
-    printf("Hello World");
+typedef struct Object {
+    int x, y;
+    struct Object* next;
+} Object;
+
+typedef struct {
+    Object* head;
+    int size;
+} LinkedList;
+
+Object player;
+LinkedList invaders;
+LinkedList bullets;
+int gameOver;
+char playerName[50];
+
+void initLinkedList(LinkedList* list) {
+    list->head = NULL;
+    list->size = 0;
 }
 
-void printKey(int ch)
-{
-    screenSetColor(YELLOW, DARKGRAY);
-    screenGotoxy(35, 22);
-    printf("Key code :");
+void addObject(LinkedList* list, int x, int y) {
+    Object* newObject = (Object*)malloc(sizeof(Object));
+    newObject->x = x;
+    newObject->y = y;
+    newObject->next = list->head;
+    list->head = newObject;
+    list->size++;
+}
 
-    screenGotoxy(34, 23);
-    printf("            ");
-    
-    if (ch == 27) screenGotoxy(36, 23);
-    else screenGotoxy(39, 23);
-
-    printf("%d ", ch);
-    while (keyhit())
-    {
-        printf("%d ", readch());
+void removeObject(LinkedList* list, Object* prev, Object* toRemove) {
+    if (prev == NULL) {
+        list->head = toRemove->next;
+    } else {
+        prev->next = toRemove->next;
     }
+    free(toRemove);
+    list->size--;
 }
 
-int main() 
-{
-    static int ch = 0;
+void clearLinkedList(LinkedList* list) {
+    Object* current = list->head;
+    while (current != NULL) {
+        Object* toRemove = current;
+        current = current->next;
+        free(toRemove);
+    }
+    list->head = NULL;
+    list->size = 0;
+}
 
+void initGame() {
     screenInit(1);
+    screenSetColor(WHITE, GREEN); // Mudança de cor de fundo para verde
     keyboardInit();
-    timerInit(50);
+    timerInit(100);
+    srand(time(NULL));
 
-    printHello(x, y);
-    screenUpdate();
+    initLinkedList(&invaders);
+    initLinkedList(&bullets);
 
-    while (ch != 10) //enter
-    {
-        // Handle user input
-        if (keyhit()) 
-        {
-            ch = readch();
-            printKey(ch);
-            screenUpdate();
-        }
+    gameOver = 0;
 
-        // Update game state (move elements, verify collision, etc)
-        if (timerTimeOver() == 1)
-        {
-            int newX = x + incX;
-            if (newX >= (MAXX -strlen("Hello World") -1) || newX <= MINX+1) incX = -incX;
-            int newY = y + incY;
-            if (newY >= MAXY-1 || newY <= MINY+1) incY = -incY;
+    player.x = MAXX / 2;
+    player.y = MAXY - 2;
 
-            printKey(ch);
-            printHello(newX, newY);
-
-            screenUpdate();
-        }
+    for (int i = 0; i < MAX_INVADERS; i++) {
+        addObject(&invaders, (i % 5) * 10 + 5, (i / 5) * 2 + 1);
     }
+}
 
+void destroyGame() {
+    clearLinkedList(&invaders);
+    clearLinkedList(&bullets);
     keyboardDestroy();
     screenDestroy();
     timerDestroy();
+}
+
+void drawObject(Object* obj, char symbol) {
+    screenGotoxy(obj->x, obj->y);
+    printf("%c", symbol);
+}
+
+void drawGame() {
+    screenClear();
+    screenSetColor(WHITE, GREEN);
+    drawObject(&player, PLAYER_SYMBOL);
+
+    Object* current = invaders.head;
+    while (current != NULL) {
+        drawObject(current, INVADER_SYMBOL);
+        current = current->next;
+    }
+
+    current = bullets.head;
+    while (current != NULL) {
+        drawObject(current, BULLET_SYMBOL);
+        current = current->next;
+    }
+
+}
+
+void updateBullets() {
+    Object* current = bullets.head;
+    Object* prev = NULL;
+
+    while (current != NULL) {
+        current->y--;
+
+        if (current->y < MINY) {
+            Object* toRemove = current;
+            current = current->next;
+            removeObject(&bullets, prev, toRemove);
+        } else {
+            prev = current;
+            current = current->next;
+        }
+    }
+}
+
+void shootBullet() {
+    if (bullets.size < MAX_BULLETS) {
+        addObject(&bullets, player.x, player.y - 1);
+    }
+}
+
+void updateInvaders() {
+    for (int i = 0; i < 2; i++) {
+        if (invaders.size > 0) {
+            int invaderIndex = rand() % invaders.size;
+            Object* current = invaders.head;
+            for (int j = 0; j < invaderIndex; j++) {
+                current = current->next;
+            }
+            current->y++;
+            if (current->y >= player.y && current->x == player.x) {
+                gameOver = 1;
+            }
+            if (current->y > MAXY) {
+                current->y = 1;
+            }
+        }
+    }
+}
+
+void updateGame() {
+    if (keyhit()) {
+        int ch = readch();
+        if (ch == 'a' && player.x > MINX + 1) {
+            player.x--;
+        } else if (ch == 'd' && player.x < MAXX - 1) {
+            player.x++;
+        } else if (ch == ' ') {
+            shootBullet();
+        }
+    }
+
+    updateBullets();
+    updateInvaders();
+
+    Object* invader = invaders.head;
+    Object* prevInvader = NULL;
+
+    while (invader != NULL) {
+        Object* bullet = bullets.head;
+        Object* prevBullet = NULL;
+
+
+            prevBullet = bullet;
+            bullet = bullet->next;
+        }
+        prevInvader = invader;
+        invader = invader->next;
+    }
+
+
+
+int main() {
+    int choice;
+
+    do {
+        printf("Menu:\n");
+        printf("2: Jogar o jogo\n");
+        printf("3: Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &choice);
+        getchar();
+
+        switch (choice) {
+
+                break;
+            case 2:
+                printf("Digite seu nome: ");
+                fgets(playerName, 50, stdin);
+                playerName[strcspn(playerName, "\n")] = 0;
+
+                initGame();
+
+                while (invaders.size > 0 && !gameOver) {
+                    if (timerTimeOver()) {
+                        updateGame();
+                        drawGame();
+                    }
+                }
+
+                destroyGame();
+
+            case 3:
+                printf("Jogo encerrado, OBRIGADO!\n");
+                break;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+    } while (choice != 3);
 
     return 0;
 }
