@@ -7,5 +7,7 @@ Marcelo Bresani - mbvo@cesar.school;
 Thiago Nadler - tlns@cesar.school;
 Rodrigo Torres - rtgf@cesar.school;
 
-## Descrição
-O conceito do jogo se trata de um homem que percorre um corredor, tendo que passar entre paredes.
+## Mecânica do Jogo
+- Controles: O jogador utiliza a tecla "w" para fazer o personagem "pular" e evitar obstáculos.
+- Objetivo: O objetivo é percorrer o maior número de paredes possível sem colidir. Cada parede ultrapassada representa um aumento na pontuação.
+- Personagem: O personagem no jogo é representado por um número.
