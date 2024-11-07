@@ -96,6 +96,7 @@ void drawObject(Object* obj, char symbol) {
     printf("%c", symbol);
 }
 
+
 void drawGame() {
     screenClear();
     screenSetColor(WHITE, GREEN);
@@ -113,6 +114,7 @@ void drawGame() {
         current = current->next;
     }
 
+    screenUpdate();
 }
 
 void updateBullets() {
@@ -180,13 +182,19 @@ void updateGame() {
         Object* bullet = bullets.head;
         Object* prevBullet = NULL;
 
-
+        while (bullet != NULL) {
+            if (invader->x == bullet->x && invader->y == bullet->y) {
+                removeObject(&invaders, prevInvader, invader);
+                removeObject(&bullets, prevBullet, bullet);
+                break;
+            }
             prevBullet = bullet;
             bullet = bullet->next;
         }
         prevInvader = invader;
         invader = invader->next;
     }
+}
 
 
 
@@ -195,16 +203,14 @@ int main() {
 
     do {
         printf("Menu:\n");
-        printf("2: Jogar o jogo\n");
-        printf("3: Sair\n");
+        printf("1: Jogar o jogo\n");
+        printf("2: Sair\n");
         printf("Escolha uma opção: ");
         scanf("%d", &choice);
         getchar();
 
         switch (choice) {
-
-                break;
-            case 2:
+            case 1:
                 printf("Digite seu nome: ");
                 fgets(playerName, 50, stdin);
                 playerName[strcspn(playerName, "\n")] = 0;
@@ -219,14 +225,14 @@ int main() {
                 }
 
                 destroyGame();
-
-            case 3:
+                break;
+            case 2:
                 printf("Jogo encerrado, OBRIGADO!\n");
                 break;
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
-    } while (choice != 3);
+    } while (choice != 2);
 
     return 0;
 }
