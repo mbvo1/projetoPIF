@@ -19,8 +19,6 @@ Object bullets[MAX_BULLETS];
 
 int numInvaders = MAX_INVADERS;
 int numBullets = 0;
-int score = 0;  // Variável para armazenar a pontuação
-
 void initGame() {
     screenInit(0);  // Não desenhar bordas
     keyboardInit();
@@ -48,10 +46,6 @@ void drawObject(Object obj, char symbol) {
     printf("%c", symbol);
 }
 
-void drawScore() {
-    screenGotoxy(MINX, MAXY);  // Desenhar na linha inferior da tela
-    printf("Score: %d", score);
-}
 
 void drawGame() {
     screenClear();
@@ -69,8 +63,6 @@ void drawGame() {
         drawObject(bullets[i], BULLET_SYMBOL);
     }
 
-    // Desenhar a pontuação
-    drawScore();
 
     screenUpdate();
 }
@@ -121,9 +113,6 @@ void updateGame() {
                 }
                 numInvaders--;
 
-                // Atualizar a pontuação
-                score += 10;
-
                 // Remover a bala
                 for (int k = j; k < numBullets - 1; k++) {
                     bullets[k] = bullets[k + 1];
@@ -148,7 +137,6 @@ int main() {
     }
 
     destroyGame();
-    printf("Game Over! Final Score: %d\n", score);
 
     return 0;
 }
