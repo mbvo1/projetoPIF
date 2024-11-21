@@ -25,6 +25,7 @@ typedef struct {
 Object player;
 LinkedList invaders;
 LinkedList bullets;
+int score;
 int gameOver;
 char playerName[50];
 
@@ -64,7 +65,7 @@ void clearLinkedList(LinkedList* list) {
 }
 
 void initGame() {
-    screenInit(1);
+    screenInit(1); 
     screenSetColor(WHITE, GREEN); // Mudança de cor de fundo para verde
     keyboardInit();
     timerInit(100);
@@ -73,6 +74,7 @@ void initGame() {
     initLinkedList(&invaders);
     initLinkedList(&bullets);
 
+    score = 0;
     gameOver = 0;
 
     player.x = MAXX / 2;
@@ -96,10 +98,14 @@ void drawObject(Object* obj, char symbol) {
     printf("%c", symbol);
 }
 
+void drawScore() {
+    screenGotoxy(MINX + 1, MAXY + 1);
+    printf("Score: %d", score);
+}
 
 void drawGame() {
     screenClear();
-    screenSetColor(WHITE, GREEN);
+    screenSetColor(WHITE, GREEN); 
     drawObject(&player, PLAYER_SYMBOL);
 
     Object* current = invaders.head;
@@ -114,6 +120,7 @@ void drawGame() {
         current = current->next;
     }
 
+    drawScore();
     screenUpdate();
 }
 
@@ -186,6 +193,7 @@ void updateGame() {
             if (invader->x == bullet->x && invader->y == bullet->y) {
                 removeObject(&invaders, prevInvader, invader);
                 removeObject(&bullets, prevBullet, bullet);
+                score += 10;
                 break;
             }
             prevBullet = bullet;
@@ -196,21 +204,36 @@ void updateGame() {
     }
 }
 
-
+void showScores() {
+    FILE *file = fopen("score.txt", "r");
+    if (file != NULL) {
+        char line[100];
+        while (fgets(line, sizeof(line), file)) {
+            printf("%s", line);
+        }
+        fclose(file);
+    } else {
+        printf("Nenhum score disponível.\n");
+    }
+}
 
 int main() {
     int choice;
 
     do {
         printf("Menu:\n");
-        printf("1: Jogar o jogo\n");
-        printf("2: Sair\n");
+        printf("1: Ver score\n");
+        printf("2: Jogar o jogo\n");
+        printf("3: Sair\n");
         printf("Escolha uma opção: ");
         scanf("%d", &choice);
         getchar();
 
         switch (choice) {
             case 1:
+                showScores();
+                break;
+            case 2:
                 printf("Digite seu nome: ");
                 fgets(playerName, 50, stdin);
                 playerName[strcspn(playerName, "\n")] = 0;
@@ -225,14 +248,23 @@ int main() {
                 }
 
                 destroyGame();
+                printf("Game Over! Final Score: %d\n", score);
+
+                FILE *file = fopen("score.txt", "a");
+                if (file != NULL) {
+                    fprintf(file, "Nome: %s, Score: %d\n", playerName, score);
+                    fclose(file);
+                } else {
+                    printf("Erro ao abrir o arquivo score.txt\n");
+                }
                 break;
-            case 2:
+            case 3:
                 printf("Jogo encerrado, OBRIGADO!\n");
                 break;
             default:
                 printf("Opção inválida. Tente novamente.\n");
         }
-    } while (choice != 2);
+    } while (choice != 3);
 
     return 0;
 }
