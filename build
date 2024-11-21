@@ -1,0 +1,2 @@
+mkdir -p build
+gcc -o build/space_invaders main.c screen.c timer.c keyboard.c
